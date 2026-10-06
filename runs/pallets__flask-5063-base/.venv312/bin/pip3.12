@@ -1,0 +1,6 @@
+#!/Users/krishanand/Desktop/test/swe-study/runs/pallets__flask-5063-base/.venv312/bin/python3.12
+import sys
+from pip._internal.cli.main import main
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(main())
