@@ -16,3 +16,20 @@ Summary (final, n=6, r2 row for 2674):
 - MCP input tokens total: 85,255+50,166+99,584+53,960+155,134+98,640 = 542,739 → 90,457/solve
 - Base input tokens total: 210,749+84,188+41,777+60,734+80,530+39,070 = 517,048 → 103,410/solve
 - Median wall time per arm: ~1.5 min both
+
+## Batch 2 (all `high`, frozen `tasks/pick2.txt`)
+
+| task | mcp solved | mcp tokens (in/out) | mcp wall | base solved | base tokens (in/out) | base wall |
+|------|-----------|---------------------|----------|-------------|----------------------|-----------|
+| psf__requests-863 | y (4/4 F2P, 4-line fix) | 67,428 / 1,474 (+1,867 reasoning; 205,162 cache read) | ~1.5 min | y (4/4 F2P, 4-line fix) | 81,336 / 1,704 (+2,527 reasoning; 303,790 cache read) | ~1 min |
+| psf__requests-2148 | y (10/10 F2P, 4-line fix) | 177,946 / 2,591 (+1,591 reasoning; 855,591 cache read) | ~3.5 min | n (9/10, 16-line fix, misses socket-error wrap) | 190,134 / 7,585 (+9,921 reasoning; 2,628,618 cache read) | long session, idle overnight |
+| pytest-dev__pytest-7432 | y (1/1 F2P, 1-line fix) | 39,299 / 2,958 (+3,847 reasoning; 672,039 cache read) | ~2.5 min | y (1/1 F2P, 12-line rewrite) | 27,974 / 2,682 (+3,127 reasoning; 293,166 cache read) | ~1 min |
+| pytest-dev__pytest-8906 (`xhigh` both arms) | y (1/1 F2P, 4-line fix) | 46,322 / 2,097 (+918 reasoning; 683,476 cache read) | ~1 min | y (1/1 F2P, 4-line fix) | 69,573 / 1,733 (+950 reasoning; 511,632 cache read) | ~1 min |
+| mwaskom__seaborn-3407 (`xhigh` both) | n (crash fixed, diag_vars comparison missed) | 161,637 / 4,034 (+4,253 reasoning; 942,616 cache read) | ~3 min | n (same ambiguous-truth trap) | 103,546 / 3,397 (+2,616 reasoning; 607,256 cache read) | ~3 min |
+| psf__requests-1963 (`high` both) | y (7/7 F2P, 5-line fix) | 68,870 / 2,769 (+2,796 reasoning; 276,428 cache read) | ~1 min | y (7/7 F2P, 5-line fix) | 38,455 / 3,687 (+1,917 reasoning; 684,267 cache read) | ~3 min |
+
+## Summary
+
+Batch 1 (all `high`): MCP 6/6, base 5/6. MCP input 542,739 (90,457/solve); base 517,048 (103,410/solve).
+Batch 2 (`high` except 8906 + 3407 `xhigh` both arms): MCP 4/6, base 3/6.
+Combined (12 tasks): MCP 10/12, base 8/12.

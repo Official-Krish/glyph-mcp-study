@@ -11,7 +11,21 @@ from datasets import load_dataset
 OUT = Path(__file__).parent / "swe_lite.json"
 
 
-def as_list(v):
+def patch_stats(patch):
+    """(files touched, added+removed lines) for a unified diff."""
+    files, added, removed = set(), 0, 0
+    current = None
+    for line in (patch or "").splitlines():
+        if line.startswith("diff --git"):
+            parts = line.split(" b/", 1)
+            current = parts[1] if len(parts) == 2 else None
+            if current:
+                files.add(current)
+        elif line.startswith("+") and not line.startswith("+++"):
+            added += 1
+        elif line.startswith("-") and not line.startswith("---"):
+            removed += 1
+    return len(files), added + removed
     if isinstance(v, list):
         return list(v)
     if isinstance(v, str):

@@ -1,0 +1,16 @@
+diff --git a/requests/sessions.py b/requests/sessions.py
+index 425db22c..82b1a3a6 100644
+--- a/requests/sessions.py
++++ b/requests/sessions.py
+@@ -180,6 +180,11 @@ class SessionRedirectMixin(object):
+ 
+             extract_cookies_to_jar(self.cookies, prepared_request, resp.raw)
+ 
++            # Update the request to the latest one, so that subsequent
++            # redirects build off of it (e.g. method conversion from a
++            # 303 See Other is preserved across a following 307).
++            req = prepared_request
++
+             i += 1
+             yield resp
+ 

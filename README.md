@@ -1,28 +1,40 @@
-# Outcome study: Glyph MCP vs grep (SWE-bench Lite, n=6)
+# Outcome study: Glyph MCP vs grep (SWE-bench Lite, n=12)
 
 Manual A/B. One human drives OpenCode TUI; the agent fixes real issues twice —
 once with Glyph MCP tools, once with grep/glob/read only. Graded blind by the
 official FAIL_TO_PASS tests.
 
-## Result
+## Result (combined)
+
+Solve rate **MCP 10/12, baseline 8/12**.
 
 | task | MCP | baseline |
 |---|---|---|
-| psf__requests-2674 (r2) | ✅ 12/12 · 85k in | ✅ 12/12 · 211k in |
+| psf__requests-2674 (r2) | ✅ 12/12 · 85k in · 4-line | ✅ 12/12 · 211k in |
 | pallets__flask-4045 | ✅ 2/2 · 50k in | ✅ 2/2 · 84k in |
 | pallets__flask-4992 | ✅ 1/1 · 100k in | ✅ 1/1 · 42k in |
 | psf__requests-3362 | ✅ 1/1 · 54k in | ❌ wrong fix · 61k in |
 | pallets__flask-5063 | ✅ 2/2 · 155k in | ✅ 2/2 · 81k in |
 | psf__requests-2317 | ✅ 8/8 · 99k in | ✅ 8/8 · 39k in |
+| psf__requests-863 | ✅ 4/4 · 67k in · 4-line | ✅ 4/4 · 81k in · 4-line |
+| psf__requests-2148 | ✅ 10/10 · 178k in · 4-line | ❌ 9/10 · 190k in · 16-line |
+| pytest-dev__pytest-7432 | ✅ 1/1 · 39k in · 1-line | ✅ 1/1 · 28k in · 12-line |
+| pytest-dev__pytest-8906 | ✅ 1/1 · 46k in · 4-line | ✅ 1/1 · 70k in · 4-line |
+| mwaskom__seaborn-3407 | ❌ near-miss · 162k in | ❌ same trap · 104k in |
+| psf__requests-1963 | ✅ 7/7 · 19k in · 5-line | ✅ 7/7 · 38k in · 5-line |
 
-Solve rate **MCP 6/6, baseline 5/6**. Tokens-per-solve (input):
-**MCP ~90k, baseline ~103k** — a wash at n=6 with large run-to-run variance
-(same arm re-ran 93k→211k with nothing changed). The one split: 3362, where
-MCP's fallback-decode passed and baseline's raise-TypeError failed.
+MCP-only solves (2): 3362 (fallback-decode vs TypeError), 2148 (socket-error
+wrap vs 9/10 miss) — both needed context beyond the obvious file. Both-fail
+(1): 3407, identical numpy ambiguous-truth trap — task hardness, not tooling.
+Tokens-per-solve is a wash with large run-to-run variance; fix sizes skew
+minimal on MCP solves (1/4/4/5-line) vs occasional baseline rewrites
+(12/16-line).
 
 Full per-arm detail (tokens in/out, reasoning, cache, tool counts, model
 variant, wall time): `tasks/scoreboard.md`. Session exports, patches, and
-per-arm prompts: `runs/`.
+per-arm prompts: `runs/`. Batch 1 = `tasks/pick.txt`, batch 2 = `tasks/pick2.txt`.
+Variant log: batch 1 all `high` (2674-r1 mixed, superseded); batch 2 `high`
+except 8906 + 3407 matched-`xhigh` pairs (kept, labeled).
 
 ## Protocol (frozen before run 1)
 
