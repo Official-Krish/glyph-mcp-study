@@ -1,0 +1,5 @@
+You are refactoring this repository. Make the change below, keeping all existing behavior identical. When done, stop.
+For code search and context, use grep, glob, and read.
+
+REFACTOR:
+In `pytest_runtest_makereport` (`src/_pytest/skipping.py`), the xfail-handling branches (the `runxfail` passthrough, the `xfail.Exception` branch, and the `xfail` re-evaluation branch) are inline in a long if/elif chain. Extract them into a module-level helper `evaluate_xfail_report(item, call, rep, xfailed)` that mutates `rep` in place and returns nothing, then call it from `pytest_runtest_makereport` in place of those branches. Do not change any behavior — the full `testing/test_skipping.py` suite must keep passing.

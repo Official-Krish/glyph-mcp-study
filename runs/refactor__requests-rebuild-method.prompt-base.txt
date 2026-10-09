@@ -1,0 +1,5 @@
+You are refactoring this repository. Make the change below, keeping all existing behavior identical. When done, stop.
+For code search and context, use grep, glob, and read.
+
+REFACTOR:
+In `Session.resolve_redirects` (`requests/sessions.py`), the redirect method-rewriting rules (303 See Other → GET, 302 Found → GET, except HEAD) are inline in the redirect loop. Extract them into a module-level helper `rebuild_method(prepared_request, response)` that applies the rules and returns nothing (it mutates the prepared request's method in place), then call it from `resolve_redirects` in place of the inline block. Do not change any behavior — all existing redirect tests must keep passing.

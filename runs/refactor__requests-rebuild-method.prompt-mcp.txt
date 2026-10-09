@@ -1,0 +1,7 @@
+You are refactoring this repository. Make the change below, keeping all existing behavior identical. When done, stop.
+This repo is indexed by Glyph over MCP. For any multi-file task call `get_context` before reading files. Check `analyze_impact` before modifying shared code.
+For code search and context, use the glyph MCP tools (search_code, get_context, get_symbol, find_references, analyze_impact, get_file_outline). Prefer them over grep.
+Do not re-read files already shown in MCP output — cite the shown lines. Verify with the single most relevant test file plus -q; paste only failures.
+
+REFACTOR:
+In `Session.resolve_redirects` (`requests/sessions.py`), the redirect method-rewriting rules (303 See Other → GET, 302 Found → GET, except HEAD) are inline in the redirect loop. Extract them into a module-level helper `rebuild_method(prepared_request, response)` that applies the rules and returns nothing (it mutates the prepared request's method in place), then call it from `resolve_redirects` in place of the inline block. Do not change any behavior — all existing redirect tests must keep passing.

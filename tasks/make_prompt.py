@@ -11,8 +11,14 @@ HERE = Path(__file__).parent
 STUDY = HERE.parent
 
 MCP_HEADER = """You are fixing a GitHub issue in this repository. Edit files to resolve it. When done, stop.
-This repo is indexed by Glyph over MCP. For any multi-file task call `get_context` before reading files. Check `analyze_impact` before modifying shared code.
-For code search and context, use the glyph MCP tools (search_code, get_context, get_symbol, find_references, analyze_impact, get_file_outline). Prefer them over grep.
+This repo is indexed by Glyph over MCP. Rules:
+- Call `get_context` BEFORE reading any files. One call replaces grep/glob/read for exploration.
+- Code shown in MCP output IS the source. Cite the shown line numbers and edit directly — never re-read a file already shown in MCP output.
+- Use bash ONLY for: running tests, or checking a runtime value that cannot be answered from code. NOT for file reading, grep, or exploration.
+- Check `analyze_impact` before modifying any shared function, type, or API.
+- After editing, run the single most relevant test with -q. If it passes, stop — do not run extra verification.
+
+MCP tools: search_code, get_context, get_symbol, find_references, analyze_impact, get_file_outline.
 
 ISSUE:
 """

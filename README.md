@@ -1,12 +1,13 @@
-# Outcome study: Glyph MCP vs grep (SWE-bench Lite, n=12)
+# Outcome study: Glyph MCP vs grep (SWE-bench Lite, n=12 + extension n=5)
 
 Manual A/B. One human drives OpenCode TUI; the agent fixes real issues twice —
 once with Glyph MCP tools, once with grep/glob/read only. Graded blind by the
-official FAIL_TO_PASS tests.
+official FAIL_TO_PASS tests (Lite/django) or green-suite checks (refactors).
 
 ## Result (combined)
 
-Solve rate **MCP 10/12, baseline 8/12**.
+Solve rate **MCP 10/12, baseline 8/12** (Lite) · **MCP 5/5, baseline 5/5**
+(extension) · **MCP 15/17, baseline 13/17** overall.
 
 | task | MCP | baseline |
 |---|---|---|
@@ -22,6 +23,11 @@ Solve rate **MCP 10/12, baseline 8/12**.
 | pytest-dev__pytest-8906 | ✅ 1/1 · 46k in · 4-line | ✅ 1/1 · 70k in · 4-line |
 | mwaskom__seaborn-3407 | ❌ near-miss · 162k in | ❌ same trap · 104k in |
 | psf__requests-1963 | ✅ 7/7 · 19k in · 5-line | ✅ 7/7 · 38k in · 5-line |
+| django__django-11019 (r3 redo) | ✅ 16/16 · 99k in | ❌ 9/16 · 63k in |
+| django__django-16820 (r3 redo) | ✅ 7/7 · 53k in | ✅ 7/7 · 63k in |
+| refactor__requests-rebuild-method | ✅ redirect suite green · 34k in | ✅ redirect suite green · 26k in |
+| refactor__pytest-xfail-extract | ✅ 77 pass · 29k in | ✅ 77 pass · 35k in |
+| refactor__flask-routes-table | ✅ route tests green · 24k in | ✅ route tests green · 38k in |
 
 MCP-only solves (2): 3362 (fallback-decode vs TypeError), 2148 (socket-error
 wrap vs 9/10 miss) — both needed context beyond the obvious file. Both-fail
@@ -29,6 +35,12 @@ wrap vs 9/10 miss) — both needed context beyond the obvious file. Both-fail
 Tokens-per-solve is a wash with large run-to-run variance; fix sizes skew
 minimal on MCP solves (1/4/4/5-line) vs occasional baseline rewrites
 (12/16-line).
+
+Extension batch (Oct 2026, opencode `muse-spark-1.3-contributor-free`, r3 redos
++ 3 refactors): 5/5 both arms. Input tokens favored grep overall (222k vs
+293k) — small scoped tasks both tools solve; MCP's edge historically opened on
+cross-file bugs (3362, 2148). Two extension pairs ran mixed variants
+(default vs `medium`) and stand labeled in `tasks/scoreboard.md`.
 
 Full per-arm detail (tokens in/out, reasoning, cache, tool counts, model
 variant, wall time): `tasks/scoreboard.md`. Session exports, patches, and

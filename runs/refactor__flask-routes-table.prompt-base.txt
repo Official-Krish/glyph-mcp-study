@@ -1,0 +1,5 @@
+You are refactoring this repository. Make the change below, keeping all existing behavior identical. When done, stop.
+For code search and context, use grep, glob, and read.
+
+REFACTOR:
+The `routes` CLI command (`routes_command` in `src/flask/cli.py`) builds its ASCII table inline (row assembly, header/sort handling, width computation, template formatting, echo loop). Extract all of that into a pure module-level helper `format_route_table(rules, sort, all_methods) -> str` that takes the URL rules plus the command options and returns the complete table text (including the "No routes were registered." case), then make `routes_command` a thin wrapper that collects the rules and prints the helper's return value. Do not change any behavior — the `tests/test_cli.py` route tests must keep passing.

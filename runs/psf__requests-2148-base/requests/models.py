@@ -9,7 +9,6 @@ This module contains the primary objects that power Requests.
 
 import collections
 import datetime
-import socket
 
 from io import BytesIO, UnsupportedOperation
 from .hooks import default_hooks
@@ -20,7 +19,7 @@ from .cookies import cookiejar_from_dict, get_cookie_header
 from .packages.urllib3.fields import RequestField
 from .packages.urllib3.filepost import encode_multipart_formdata
 from .packages.urllib3.util import parse_url
-from .packages.urllib3.exceptions import DecodeError, ProtocolError
+from .packages.urllib3.exceptions import DecodeError
 from .exceptions import (
     HTTPError, RequestException, MissingSchema, InvalidURL,
     ChunkedEncodingError, ContentDecodingError)
@@ -637,24 +636,17 @@ class Response(object):
                 try:
                     for chunk in self.raw.stream(chunk_size, decode_content=True):
                         yield chunk
-                except ProtocolError as e:
-                    raise ChunkedEncodingError(e)
                 except IncompleteRead as e:
                     raise ChunkedEncodingError(e)
                 except DecodeError as e:
                     raise ContentDecodingError(e)
-                except socket.error as e:
-                    raise ChunkedEncodingError(e)
             except AttributeError:
                 # Standard file-like object.
-                try:
-                    while True:
-                        chunk = self.raw.read(chunk_size)
-                        if not chunk:
-                            break
-                        yield chunk
-                except socket.error as e:
-                    raise ChunkedEncodingError(e)
+                while True:
+                    chunk = self.raw.read(chunk_size)
+                    if not chunk:
+                        break
+                    yield chunk
 
             self._content_consumed = True
 

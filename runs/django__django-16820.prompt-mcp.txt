@@ -1,0 +1,10 @@
+You are fixing a GitHub issue in this repository. Edit files to resolve it. When done, stop.
+This repo is indexed by Glyph over MCP. For any multi-file task call `get_context` before reading files. Check `analyze_impact` before modifying shared code.
+For code search and context, use the glyph MCP tools (search_code, get_context, get_symbol, find_references, analyze_impact, get_file_outline). Prefer them over grep.
+
+ISSUE:
+Squashing migrations with Meta.index_together -> indexes transition should remove deprecation warnings.
+Description
+	
+Squashing migrations with Meta.index_together -> Meta.indexes transition should remove deprecation warnings. As far as I'm aware, it's a 4.2 release blocker because you cannot get rid of the index_together deprecation warnings without rewriting migrations, see comment.
+

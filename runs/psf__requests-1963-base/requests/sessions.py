@@ -180,11 +180,6 @@ class SessionRedirectMixin(object):
 
             extract_cookies_to_jar(self.cookies, prepared_request, resp.raw)
 
-            # Update the request to the latest one, so that subsequent
-            # redirects build off of it (e.g. method conversion from a
-            # 303 See Other is preserved across a following 307).
-            req = prepared_request
-
             i += 1
             yield resp
 

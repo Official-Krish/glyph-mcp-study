@@ -1,6 +1,5 @@
 import zlib
 import io
-import socket
 from socket import timeout as SocketTimeout
 
 from ._collections import HTTPHeaderDict
@@ -207,7 +206,7 @@ class HTTPResponse(io.IOBase):
 
                 raise ReadTimeoutError(self._pool, None, 'Read timed out.')
 
-            except (HTTPException, socket.error) as e:
+            except HTTPException as e:
                 # This includes IncompleteRead.
                 raise ProtocolError('Connection broken: %r' % e, e)
 

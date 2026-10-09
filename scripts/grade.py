@@ -7,6 +7,7 @@ Prints PASS/FAIL per test and a final SOLVED / NOT SOLVED verdict.
 """
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -16,6 +17,43 @@ STUDY = Path(__file__).parent.parent
 # Override grading interpreter, e.g. GRADE_VENV=.venv312 to re-grade under
 # a different Python without touching the agent's runtime env.
 GRADE_VENV = os.environ.get("GRADE_VENV", ".venv")
+
+
+def resolve_django_doc_label(workdir, entry):
+    """Map a docstring/comment-style F2P entry (no parens) to a dotted
+    test label by finding the enclosing `def test_*` (+ class) in tests/."""
+    needle = entry.lstrip("#").strip().rstrip(".")
+    tests_dir = Path(workdir) / "tests"
+    if not tests_dir.is_dir():
+        return None
+    for path in sorted(tests_dir.rglob("test_*.py")):
+        try:
+            lines = path.read_text().splitlines()
+        except OSError:
+            continue
+        for i, line in enumerate(lines):
+            if needle[:40] not in line:
+                continue
+            method = cls = None
+            for back in lines[:i][::-1]:
+                if method is None:
+                    m = re.match(r"\s*def (test_\w+)\(", back)
+                    if m:
+                        method = m.group(1)
+                if cls is None:
+                    m = re.match(r"\s*class (\w+)", back)
+                    if m:
+                        cls = m.group(1)
+                if method and cls:
+                    break
+            if method:
+                mod = path.relative_to(workdir).with_suffix("").as_posix()
+                mod = mod.replace("/", ".")
+                # runtests.py labels omit the leading tests/ package.
+                if mod.startswith("tests."):
+                    mod = mod[len("tests."):]
+                return f"{mod}.{cls}.{method}" if cls else f"{mod}.{method}"
+    return None
 
 
 def sh(cmd, **kw):
@@ -53,8 +91,41 @@ def main() -> None:
     # Newer interpreters emit DeprecationWarnings (e.g. ast.Str on 3.12) that
     # era configs escalate via filterwarnings=error. That's environment noise,
     # not the patch — ignore it during grading.
-    cmd = [pytest, "-q", "-p", "no:cacheprovider",
-           "-W", "ignore::DeprecationWarning", *task["fail2pass"]]
+    # Django repos run their own runner: tests/runtests.py <test labels>.
+    runner = Path(workdir) / "tests" / "runtests.py"
+    test_ids: list = list(task["fail2pass"])
+    if runner.exists():
+        # Django F2P ids look like "test_x (module.Class)" — reassemble
+        # to the dotted label runtests.py expects: module.Class.test_x.
+        fixed = []
+        for tid in test_ids:
+            if " (" in tid and tid.endswith(")"):
+                name, loc = tid[:-1].split(" (", 1)
+                # Dataset is inconsistent: some locs already end with the
+                # test method (16820), others stop at the class (11019).
+                fixed.append(loc if loc.endswith(f".{name}") else f"{loc}.{name}")
+            elif " (" not in tid:
+                # Docstring/comment-style django id: resolve to parent test.
+                resolved = resolve_django_doc_label(workdir, tid)
+                if resolved:
+                    print(f"resolved {tid!r} -> {resolved}")
+                    fixed.append(resolved)
+                else:
+                    print(f"UNRESOLVED test id: {tid!r} (skipped)")
+            else:
+                fixed.append(tid)
+        test_ids = fixed
+        if not test_ids:
+            print("VERDICT: GRADE-ERROR (no runnable test ids)")
+            return
+        cmd = [
+            f"{workdir}/{GRADE_VENV}/bin/python",
+            str(runner),
+            *test_ids,
+        ]
+    else:
+        cmd = [pytest, "-q", "-p", "no:cacheprovider",
+               "-W", "ignore::DeprecationWarning", *test_ids]
     print("$", " ".join(cmd), f"(cwd={workdir})")
     r = sh(cmd, timeout=1200, cwd=workdir)
     print(r.stdout[-3000:])

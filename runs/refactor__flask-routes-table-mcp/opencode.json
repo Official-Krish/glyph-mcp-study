@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "code-context": {
+      "type": "remote",
+      "url": "http://localhost:3002/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer ctx_live_57f29362027d5e56135b9c0e9792b28556f58adf1878c04f"
+      }
+    }
+  }
+}

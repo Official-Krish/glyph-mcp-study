@@ -26,6 +26,9 @@ def patch_stats(patch):
         elif line.startswith("-") and not line.startswith("---"):
             removed += 1
     return len(files), added + removed
+
+
+def as_list(v):
     if isinstance(v, list):
         return list(v)
     if isinstance(v, str):
@@ -45,6 +48,8 @@ lite = [
         "fail2pass": as_list(r["FAIL_TO_PASS"]),
         "pass2pass": as_list(r["PASS_TO_PASS"]),
         "statement": r["problem_statement"],
+        "gold_files": patch_stats(r.get("patch") or "")[0],
+        "gold_lines": patch_stats(r.get("patch") or "")[1],
     }
     for r in ds
 ]

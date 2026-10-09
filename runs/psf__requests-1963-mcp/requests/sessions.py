@@ -180,11 +180,6 @@ class SessionRedirectMixin(object):
 
             extract_cookies_to_jar(self.cookies, prepared_request, resp.raw)
 
-            # Rebuild the prepared request for the next iteration so that
-            # method/body/headers changes (e.g. POST -> GET on 303) are
-            # preserved instead of re-copying the original request.
-            req = prepared_request
-
             i += 1
             yield resp
 

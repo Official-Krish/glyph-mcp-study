@@ -27,9 +27,48 @@ Summary (final, n=6, r2 row for 2674):
 | pytest-dev__pytest-8906 (`xhigh` both arms) | y (1/1 F2P, 4-line fix) | 46,322 / 2,097 (+918 reasoning; 683,476 cache read) | ~1 min | y (1/1 F2P, 4-line fix) | 69,573 / 1,733 (+950 reasoning; 511,632 cache read) | ~1 min |
 | mwaskom__seaborn-3407 (`xhigh` both) | n (crash fixed, diag_vars comparison missed) | 161,637 / 4,034 (+4,253 reasoning; 942,616 cache read) | ~3 min | n (same ambiguous-truth trap) | 103,546 / 3,397 (+2,616 reasoning; 607,256 cache read) | ~3 min |
 | psf__requests-1963 (`high` both) | y (7/7 F2P, 5-line fix) | 68,870 / 2,769 (+2,796 reasoning; 276,428 cache read) | ~1 min | y (7/7 F2P, 5-line fix) | 38,455 / 3,687 (+1,917 reasoning; 684,267 cache read) | ~3 min |
-
 ## Summary
 
 Batch 1 (all `high`): MCP 6/6, base 5/6. MCP input 542,739 (90,457/solve); base 517,048 (103,410/solve).
 Batch 2 (`high` except 8906 + 3407 `xhigh` both arms): MCP 4/6, base 3/6.
 Combined (12 tasks): MCP 10/12, base 8/12.
+
+## Batch 4 = batch-3 django pair, run now (all `high` unless labeled)
+
+| task | mcp solved | mcp tokens (in/out) | mcp wall | base solved | base tokens (in/out) | base wall |
+|------|-----------|---------------------|----------|-------------|----------------------|-----------|
+| django__django-11019 (r2, improved MCP) | y (16/16 F2P, 36+/40-) | 140,952 / 9,287 (+8,668 reasoning; 4,698,544 cache read) | ~3.5 min | y (9/16 F2P, 36+/40- rewrite) | 90,195 / 3,833 (+2,474 reasoning; 785,718 cache read) | ~1.5 min |
+| django__django-11019 (r3 redo, opencode `muse-spark-1.3-contributor-free`) | y (16/16 F2P, 37+/40-, default variant) | 98,509 / 4,255 (+4,238 reasoning; 1,722,091 cache read) | ~3 min | y (16/16 F2P, 36+/40-, `medium` variant) | 63,060 / 3,938 (+2,453 reasoning; 1,066,505 cache read) | ~3 min |
+| django__django-16820 | y (7/7 F2P, 65+ pure addition) | 95,254 / 3,929 (+2,544 reasoning; 2,231,328 cache read) | ~2 min | y (7/7 F2P, 65+ pure addition) | 70,563 / 4,870 (+2,195 reasoning; 1,497,790 cache read) | ~1.5 min |
+| django__django-16820 (r3 redo, opencode `muse-spark-1.3-contributor-free`, both `medium`) | y (7/7 F2P, 65+ pure addition) | 53,639 / 5,735 (+3,196 reasoning; 2,527,204 cache read) | ~3 min | y (7/7 F2P, 65+ pure addition, `medium` variant) | 63,044 / 3,785 (+2,445 reasoning; 1,002,505 cache read) | ~4.5 min |
+
+## Batch 3 refactors (r1, opencode `muse-spark-1.3-contributor-free`)
+
+| task | mcp solved | mcp tokens (in/out) | mcp wall | base solved | base tokens (in/out) | base wall |
+|------|-----------|---------------------|----------|-------------|----------------------|-----------|
+| refactor__requests-rebuild-method | y (helper defined+called, 4 redirect tests pass, `medium`) | 34,164 / 2,469 (+1,330 reasoning; 332,108 cache read) | ~2 min | y (helper defined+called, 4 redirect tests pass, `medium`) | 25,717 / 2,829 (+1,356 reasoning; 253,403 cache read) | <1 min |
+| refactor__pytest-xfail-extract | y (helper defined+called, 77 tests pass, `medium`) | 28,934 / 2,445 (+7,045 reasoning; 267,370 cache read) | ~1.5 min | y (helper defined+called, 77 tests pass, `medium`) | 34,812 / 3,389 (+6,937 reasoning; 574,819 cache read) | ~3 min |
+| refactor__flask-routes-table | y (helper defined+called, 4 route tests pass, `medium`) | 24,527 / 2,435 (+1,348 reasoning; 291,148 cache read) | ~1 min | y (helper defined+called, 4 route tests pass, default variant) | 38,417 / 1,639 (+1,147 reasoning; 215,304 cache read) | <1 min |
+
+## Batch 2 rerun r4 (pick2.txt, opencode `muse-spark-1.3-contributor-free`, web OFF both arms, raw statements, no hints)
+
+Protocol deltas vs original batch 2: nested `.git` dirs were gone (publish scrub) — restored via shallow fetch + `reset --hard` to pinned base; fresh MCP keys; `tools.webfetch/websearch: false` in all 12 configs; prompts = frozen concise headers + raw `problem_statement`. Index vintage: batch-1/2 indexes predate the import-edge extractor fix — indexed commits verified equal to pinned base commits.
+
+| task | mcp solved | mcp tokens (in/out) | mcp wall | base solved | base tokens (in/out) | base wall |
+|------|-----------|---------------------|----------|-------------|----------------------|-----------|
+
+Agent-reported tool value (16820, verbatim summary): get_context (squash path via
+optimizer, callers/tests), search_code (warning source options.py + ModelState
+handling), get_file_outline (optimizer mechanism), analyze_impact
+(CreateModel.reduce: 10 dependents, mainly optimize_inner — safe to extend).
+Web for ticket #34529/PR #16820 + commit diff (exact expected fix); final fix
+matched upstream, self-verified by 39 optimizer tests + manual rename case.
+Same division as 11019: MCP for code, web for canonical spec.
+
+Agent-reported tool value (11019-r2, verbatim summary): get_context (first call,
+Media.merge impl + callers + tests), get_file_outline + get_symbol (Media layout,
+__add__ concatenates), search_code (merging sites + confirmed scenario not
+in-repo), analyze_impact (only _css/_js + tests depend → safe signature change).
+Web search used for canonical issue spec + upstream ticket 30179/PR 11019
+(topological_sort + OrderedSet), not for code. Local search correctly had no
+ColorPicker example — out of index scope by design.

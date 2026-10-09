@@ -1,1 +1,9 @@
 .venv
+.venv312
+*.po
+runs/*/.git/
+runs/*-mcp/*
+runs/*-base/*
+!runs/*-mcp/opencode.json
+!runs/*-base/opencode.json
+*.mo

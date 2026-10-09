@@ -1,0 +1,7 @@
+You are refactoring this repository. Make the change below, keeping all existing behavior identical. When done, stop.
+This repo is indexed by Glyph over MCP. For any multi-file task call `get_context` before reading files. Check `analyze_impact` before modifying shared code.
+For code search and context, use the glyph MCP tools (search_code, get_context, get_symbol, find_references, analyze_impact, get_file_outline). Prefer them over grep.
+Do not re-read files already shown in MCP output — cite the shown lines. Verify with the single most relevant test file plus -q; paste only failures.
+
+REFACTOR:
+In `pytest_runtest_makereport` (`src/_pytest/skipping.py`), the xfail-handling branches (the `runxfail` passthrough, the `xfail.Exception` branch, and the `xfail` re-evaluation branch) are inline in a long if/elif chain. Extract them into a module-level helper `evaluate_xfail_report(item, call, rep, xfailed)` that mutates `rep` in place and returns nothing, then call it from `pytest_runtest_makereport` in place of those branches. Do not change any behavior — the full `testing/test_skipping.py` suite must keep passing.
